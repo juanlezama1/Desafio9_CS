@@ -1,56 +1,52 @@
 import { Router } from "express"
 import { userModel } from '../models/users.js'
+import { createHash, comparePSW } from "../utils/bcrypt.js"
+import passport from "passport"
 
 const sessionsRouter = Router ()
 
 // Ruta para cargar una sesión activa en caso de login exitoso.
-sessionsRouter.post('/login', async (req, res) => {
-    try {
-        const {email, password} = req.body
-        const user = await userModel.findOne({email: email})
-        user && (user.password === password)? 
-        (
-            req.session.email = email,
-            console.log("Logueo de usuario exitoso!"),
-            res.status(200).redirect('/products')
-        ):
+// Primero se ejecuta una función middleware (passport.authenticate) y luego se ejecuta la función final que
+// trabaja en base a lo que previamente procesó el middleware
 
-        (
-            res.status(401).send("Usuario o contraseña incorrecta!"),
-            console.log("Intento de logueo de usuario sin éxito!")
-        )
+sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) => {
+    try {
+        if (!req.user)
+        {
+            return res.status(401).send("Usuario o contraseña no válidos")
+        }
+
+        req.session.user = {
+            email: req.user.email,
+            first_name: req.user.first_name
+        }
+
+        res.status(200).send("Usuario logueado correctamente")
     }
 
     catch (error)
 
     {
-        console.log("Error al loguear usuario!")
+        res.status(500).send("Error al loguear usuario")
     }
 })
 
 // Ruta para registrar un usuario.
-sessionsRouter.post('/register', async (req, res) => {
+sessionsRouter.post('/register', passport.authenticate('register'), async (req, res) => {
     try {
-        const {first_name, last_name, age, email, password} = req.body
-        const user = await userModel.findOne({email: email})
-
-        if (user)
-
+        if (!req.user)
         {
-            res.status(400).send("Correo electrónico ya registrado!")
-            console.log("Intento de registro con correo ya cargado")
-            return
+            return res.status(401).send("Usuario ya existente en la aplicación")
         }
 
-        await userModel.create({first_name, last_name, age, email, password}) 
-        res.status(200).send("Usuario creado exitosamente!")
-        console.log("Usuario registrado en DB!")
+        console.log(req.user)
+        res.status(200).send("Usuario creado correctamente")
     }
 
     catch (error)
 
     {
-        console.log("Error al registrar usuario!")
+        res.status(500).send("Error al registrar usuario")
     }
 })
 

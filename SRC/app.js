@@ -9,6 +9,8 @@ import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { userModel } from './models/users.js'
+import passport from 'passport'
+import initializatePassport from './config/passport/passport.js'
 
 const my_app = express ()
 const PORT = 8080
@@ -30,7 +32,10 @@ my_app.use(session({
     }),
     saveUninitialized: true
 }))
-
+initializatePassport()
+my_app.use(passport.initialize())
+my_app.use(passport.session())
+ 
 // Rutas
 my_app.use('/', indexRouter)
 
