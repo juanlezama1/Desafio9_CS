@@ -32,15 +32,18 @@ sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) =
 })
 
 // Ruta para registrar un usuario.
+// Sólo accede a la función de callback si regresa con éxito desde el middleware (con un done que devolvió true)
 sessionsRouter.post('/register', passport.authenticate('register'), async (req, res) => {
     try {
-        if (!req.user)
+        if (req.user === 'previously_registered')
         {
             return res.status(401).send("Usuario ya existente en la aplicación")
         }
 
-        console.log(req.user)
-        res.status(200).send("Usuario creado correctamente")
+        else 
+        {
+            res.status(200).send("Usuario creado correctamente")
+        }
     }
 
     catch (error)
