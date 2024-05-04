@@ -2,6 +2,7 @@ import local from 'passport-local'
 import passport from 'passport'
 import {userModel} from '../../models/users.js'
 import {createHash, comparePSW} from '../../utils/bcrypt.js'
+import GitHubStrategy from 'passport-github2'
 
 // Estrategia de autenticación (en este caso, local)
 const localStrategy = local.Strategy
@@ -91,6 +92,40 @@ const initializatePassport = () => {
                 return done(error)
             }}
     ))
+
+    passport.use('github', new GitHubStrategy({
+        clientID: 'Iv23liAMlvc8ItBq5qT5',
+        clientSecret: '42807b3021eae3e7ad77f5adde3a0ed06292814f',
+        callbackURL: 'http://localhost:8080/sessions/githubSession'}, async (accessToken, refreshToken, profile, done) => {
+
+        try {
+            console.log("Logueando cliente con GitHub...")
+            const user = await userModel.findOne({email: profile._json.email}).lean()
+            if (user)
+
+            {
+                console.log("Cliente p")
+                return done (null, user)
+            }
+
+            else
+
+            {
+                const new_user = await userModel.create({first_name: profile._json.name, last_name: '', age: 18, email: profile._json.email, password: createHash(`${profile._json.name}${crypto.randomUUID()}`)})
+                return done (null, new_user)
+            }
+
+              
+
+        }
+
+        catch (error)
+
+        {
+
+        }
+        }
+    ) )
 }
 
 export default initializatePassport

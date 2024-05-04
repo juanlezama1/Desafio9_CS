@@ -58,8 +58,8 @@ sessionsRouter.post('/register', passport.authenticate('register'), async (req, 
 // Ruta para registro de un usuario por GET (visual)
 sessionsRouter.get('/register', async (req, res) => {
     
-        res.status(200).render('templates/user_registration')
-        console.log("Usuario por registrarse...")
+    res.status(200).render('templates/user_registration')
+    console.log("Usuario por registrarse...")
 })
 
 // Ruta para registro de un usuario por GET (visual)
@@ -83,6 +83,29 @@ sessionsRouter.get('/logout', async (req, res) => {
         res.status(500).send("Error al finalizar sesión!")
         console.log("Error al finalizar la sesión del usuario")
     }
+})
+
+sessionsRouter.get('/github', passport.authenticate('github'), async (req, res) => {
+
+})
+
+sessionsRouter.get('/githubSession', passport.authenticate('github'), async (req, res) => {
+
+    try {
+        req.session.user = {
+            email: req.user.email,
+            name: req.user.first_name
+        }
+ 
+        res.redirect('/products')
+    }
+
+    catch (error)
+
+    {
+        res.status(500).send("Error al loguear usuario con GitHub")
+    }
+
 })
 
 export default sessionsRouter

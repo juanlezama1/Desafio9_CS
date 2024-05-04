@@ -3,14 +3,12 @@ import mongoose from 'mongoose'
 import __dirname from './path.js'
 import { engine } from 'express-handlebars'
 import indexRouter from '../SRC/routes/indexRouter.js'
-import { productModel } from './models/products.js'
-import { cartModel } from './models/carts.js'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
-import { userModel } from './models/users.js'
 import passport from 'passport'
 import initializatePassport from './config/passport/passport.js'
+import GitHubStrategy from 'passport-github2'
 
 const my_app = express ()
 const PORT = 8080
