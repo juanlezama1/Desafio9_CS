@@ -6,19 +6,19 @@ import passport from "passport"
 const sessionsRouter = Router ()
 
 // Ruta para cargar una sesión activa en caso de login exitoso.
-// Primero se ejecuta una función middleware (passport.authenticate) y luego se ejecuta la función final que
-// trabaja en base a lo que previamente procesó el middleware
+// Primero se ejecuta una función middleware (passport.authenticate) y luego se ejecuta la función callback que
+// trabaja en base a lo que previamente procesó el middleware. Sólo entra al callback si se logueó con éxito!
 
 sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) => {
-    try {
-        if (!req.user)
-        {
-            return res.status(401).send("Usuario o contraseña no válidos")
-        }
 
+    // Sólo entra a este callback si el logueo fue exitoso, caso contrario dirá "Unauthorized" con código 401
+
+    try {
         req.session.user = {
-            email: req.user.email,
-            first_name: req.user.first_name
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            age: req.user.age,
+            email: req.user.email
         }
 
         res.status(200).send("Usuario logueado correctamente")
@@ -33,6 +33,8 @@ sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) =
 
 // Ruta para registrar un usuario.
 // Sólo accede a la función de callback si regresa con éxito desde el middleware (con un done que devolvió true)
+// En mi caso, vuelve siempre, y req.user valdrá 'previosly_registered' ó 'registered' según sea el caso
+
 sessionsRouter.post('/register', passport.authenticate('register'), async (req, res) => {
     try {
         if (req.user === 'previously_registered')
@@ -67,9 +69,11 @@ sessionsRouter.get('/login', async (req, res) => {
         console.log("Usuario por loguearse...")
 })
 
+// Ruta para eliminar una sesión activa
 sessionsRouter.get('/logout', async (req, res) => {
     try {
         req.session.destroy()
+        console.log("Usuario finalizó sesión!")
         res.status(200).send("Sesión finalizada con éxito!")
     }
 
