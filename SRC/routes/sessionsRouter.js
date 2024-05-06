@@ -65,8 +65,8 @@ sessionsRouter.get('/register', async (req, res) => {
 // Ruta para registro de un usuario por GET (visual)
 sessionsRouter.get('/login', async (req, res) => {
 
-        res.status(200).render('templates/user_login')
-        console.log("Usuario por loguearse...")
+    console.log("Usuario por loguearse...")
+    res.status(200).render('templates/user_login')
 })
 
 // Ruta para eliminar una sesión activa
@@ -85,19 +85,22 @@ sessionsRouter.get('/logout', async (req, res) => {
     }
 })
 
-sessionsRouter.get('/github', passport.authenticate('github'), async (req, res) => {
+// Ruta para autenticarme a través de GitHub. 
+sessionsRouter.get('/github', passport.authenticate('github', {scope: ['user:email']}), async (req, res) => {})
 
-})
-
+// Ruta de callback, una vez autenticado a través de GitHub
 sessionsRouter.get('/githubSession', passport.authenticate('github'), async (req, res) => {
+
+    // Ahora tengo los datos de mi usuario guardados en req.session.passport.user
+    // Igualmente los guardaré en req.session.user
 
     try {
         req.session.user = {
             email: req.user.email,
             name: req.user.first_name
         }
- 
-        res.redirect('/products')
+
+        res.status(200).send("Cliente autenticado con éxito a través de GitHub!")
     }
 
     catch (error)
@@ -105,7 +108,6 @@ sessionsRouter.get('/githubSession', passport.authenticate('github'), async (req
     {
         res.status(500).send("Error al loguear usuario con GitHub")
     }
-
-})
+}) 
 
 export default sessionsRouter

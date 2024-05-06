@@ -3,6 +3,7 @@ import passport from 'passport'
 import {userModel} from '../../models/users.js'
 import {createHash, comparePSW} from '../../utils/bcrypt.js'
 import GitHubStrategy from 'passport-github2'
+import crypto from 'crypto'
 
 // Estrategia de autenticación (en este caso, local)
 const localStrategy = local.Strategy
@@ -93,39 +94,57 @@ const initializatePassport = () => {
             }}
     ))
 
-    passport.use('github', new GitHubStrategy({
-        clientID: 'Iv23liAMlvc8ItBq5qT5',
-        clientSecret: '42807b3021eae3e7ad77f5adde3a0ed06292814f',
-        callbackURL: 'http://localhost:8080/sessions/githubSession'}, async (accessToken, refreshToken, profile, done) => {
+    // Estrategia para autenticar a un usuario a través de GitHub.
+    // Aclaración: Se solicita el email, pero es posible que el usuario no tenga su email
+    // configurado de manera pública. Para este trabajo se considera EL EMAIL ES PÚBLICO
 
+    passport.use('github', new GitHubStrategy({
+        clientID: "Iv23liAMlvc8ItBq5qT5",
+        clientSecret: "42807b3021eae3e7ad77f5adde3a0ed06292814f",
+        callbackURL: "http://localhost:8080/sessions/githubSession",
+        scope: ['user:email'] // Solicitud del email
+    }, async (accessToken, refreshToken, profile, done) => {
         try {
-            console.log("Logueando cliente con GitHub...")
-            const user = await userModel.findOne({email: profile._json.email}).lean()
-            if (user)
+            // Caso que su email no sea público
+
+            if (!profile._json.email)
 
             {
-                console.log("Cliente p")
-                return done (null, user)
+                console.log("Logueo con GitHub usando email en privado"),
+                done(null, false)
             }
 
             else
 
             {
-                const new_user = await userModel.create({first_name: profile._json.name, last_name: '', age: 18, email: profile._json.email, password: createHash(`${profile._json.name}${crypto.randomUUID()}`)})
-                return done (null, new_user)
+                // Caso que ya esté guardado el usuario
+                const user = await userModel.findOne({email: profile._json.email}).lean()
+                if (user) {
+                    console.log("Cliente logueado con GitHub: previamente cargado")
+                    done(null, user)
+                }
+
+                // Caso que sea un usuario nuevo
+                else {
+                    const randomString = crypto.randomBytes(10).toString('hex')
+
+                    let first_name = profile._json.name
+                    
+                    // Caso que el nombre esté vacío (por default viene vacío)
+                    !first_name && (first_name = profile._json.login)
+
+                    // La contraseña será la combinación del nombre(ó usuario) + caracteres aleatorios
+                    let password = createHash(first_name + randomString)
+
+                    const userCreated = await userModel.create({ first_name: first_name, last_name: ' ', email: profile._json.email, age: 18, password: password})
+                    console.log("Cliente logueado con GitHub: primer login, cargado en DB")
+                    done(null, userCreated)
+                }
             }
-
-              
-
+        } catch (error) {
+            return done(error)
         }
-
-        catch (error)
-
-        {
-
-        }
-        }
-    ) )
+    }))
 }
 
 export default initializatePassport
