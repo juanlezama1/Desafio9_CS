@@ -12,6 +12,8 @@ const sessionsRouter = Router ()
 sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) => {
 
     // Sólo entra a este callback si el logueo fue exitoso, caso contrario dirá "Unauthorized" con código 401
+    // Si es exitoso, req.user tendrá al usuario que se logueó.
+    // Finalmente, el usuario quedará alojado en req.session.user
 
     try {
         req.session.user = {
@@ -21,7 +23,8 @@ sessionsRouter.post('/login', passport.authenticate('login'), async (req, res) =
             email: req.user.email
         }
 
-        res.status(200).send("Usuario logueado correctamente")
+        // Si llegó a esta altura, se logueó correctamente, lo envío a la página principal
+        res.redirect('/')
     }
 
     catch (error)
@@ -74,7 +77,10 @@ sessionsRouter.get('/logout', async (req, res) => {
     try {
         req.session.destroy()
         console.log("Usuario finalizó sesión!")
-        res.status(200).send("Sesión finalizada con éxito!")
+
+        // Usuario finalizó su sesión, lo envío a la página principal
+
+        res.redirect('/')
     }
 
     catch (error)
@@ -97,10 +103,11 @@ sessionsRouter.get('/githubSession', passport.authenticate('github'), async (req
     try {
         req.session.user = {
             email: req.user.email,
-            name: req.user.first_name
+            name: req.user.first_name 
         }
 
-        res.status(200).send("Cliente autenticado con éxito a través de GitHub!")
+        // Cliente autenticado con éxito, lo envío a la página principal
+        res.redirect('/')
     }
 
     catch (error)

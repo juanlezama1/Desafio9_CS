@@ -31,7 +31,7 @@ const initializatePassport = () => {
         
                 if (user)
         
-                // Si ya lo tenía cargado, devuelvo "true" y el código asociado
+                // Si ya lo tenía cargado, devuelvo "true" con su código asociado
                 {
                     console.log("Intento de registro con correo ya cargado")
                     return done(null, 'previously_registered')

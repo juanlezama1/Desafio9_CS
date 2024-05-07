@@ -7,7 +7,11 @@
                     {{#if user}}
                         <h3 style="font-style: italic;">Hola {{user}}</h3>
                     {{else}}
-                        <h3 style="font-style: italic;">Usuario sin loguear</h3>
+                            <div>
+                                <h3 style="font-style: italic;">Usuario sin loguear</h3>
+                                <button><a href="http://localhost:8080/sessions/register">REGISTRO</a></button>
+                                <button><a href="http://localhost:8080/sessions/login">LOGIN</a></button>
+                            </div>
                     {{/if}}
                 </div>
 

@@ -16,7 +16,7 @@ indexRouter.use('/sessions', sessionsRouter, express.static(__dirname + '/public
 
 indexRouter.get('/', async (req, res) => {
 
-    res.redirect('/sessions/login')
+    res.redirect('/products')
 })
 
 export default indexRouter

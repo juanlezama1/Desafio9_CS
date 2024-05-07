@@ -9,9 +9,17 @@ productsRouter.get('/', async (req, res) => {
     const {limit} = req.query // Si no se mandó, tendrá el valor 'undefined'
 
     let user // Si no tiene una sesión activa, valdrá 'undefined'
-    if (req.session.email)
+
+    try {
+        if (req.session.user.email)
+            {
+                user = await userModel.findOne({email: req.session.user.email})
+            }
+    }
+
+    catch (error)
     {
-        user = await userModel.findOne({email: req.session.email})
+        // Usuario sin identificar
     }
 
     let user_name // Si no tiene una sesión activa, todas valdrán 'undefined'
